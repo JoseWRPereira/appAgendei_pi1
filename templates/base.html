@@ -9,15 +9,15 @@
     <body>
         <header>
             <ul id="menu"> 
-                <li><a class="active" href="/createtables">Agendei</a></li>
+                <li><a class="active" href="/">Agendei</a></li>
                 <li><a class="deactive" href="/main">Reservas</a></li>
-                <li><a class="deactive" href="/gerenciar/usuarios">Usuários</a></li>
-                <li><a class="deactive" href="/gerenciar/carrinhos">Carrinhos</a></li>
                 {% if userName!='' %}
                 <li><a class="deactive" href="/agendar">Agendar</a></li>
                 <li><a class="deactive" href="/excluir">Excluir</a></li>
                 {% endif %}
                 {% if userName=='Admin' %}
+                <li><a class="deactive" href="/gerenciar/usuarios">Usuários</a></li>
+                <li><a class="deactive" href="/gerenciar/carrinhos">Carrinhos</a></li>
                 <!-- <li><a class="deactive" href="/gerenciar/disciplinas">Disciplinas</a></li> -->
                 <!-- <li><a class="deactive" href="/gerenciar/usuarios">Usuários</a></li>
                 <li><a class="deactive" href="/gerenciar/carrinhos">Carrinhos</a></li> -->

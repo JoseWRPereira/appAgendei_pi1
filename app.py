@@ -12,10 +12,32 @@ from psycopg2 import Error
 ###############################################################################
 ##################################### Conexão com o Banco de Dados - PostgreSQL
 ###############################################################################
+
+class DBCredential_local:
+    def __init__(self):
+        self.host = '127.0.0.1'
+        self.database = 'pi1db'
+        self.user = 'postgres'
+        self.port = '5432'
+        self.password = 'postgres'
+        self.uri = "postgresql://postgres:postgres@localhost:5432/pi1db"
+
+class DBCredential_online:
+    def __init__(self):
+        self.host = 'ec2-35-168-80-116.compute-1.amazonaws.com'
+        self.database = 'db11rl4t5fok51'
+        self.user = 'mkquynsqfbowgn'
+        self.port = '5432'
+        self.password = '9ab6e907db802c1d080322a55145014df75063d39e3aa405a244a6a7cf4e1524'
+        self.uri = 'postgres://mkquynsqfbowgn:9ab6e907db802c1d080322a55145014df75063d39e3aa405a244a6a7cf4e1524@ec2-35-168-80-116.compute-1.amazonaws.com:5432/db11rl4t5fok51'
+        self.heroku_cli = 'heroku pg:psql postgresql-reticulated-70968 --app agendei-pi1'
+
+
+dbcredential = DBCredential_online()
+
 def sql_fetch(sql):
     try:
-        cmd = "postgresql://postgres:postgres@localhost:5432/pi1db"
-        connection = psycopg2.connect( cmd )
+        connection = psycopg2.connect( dbcredential.uri )
         cursor = connection.cursor()
         cursor.execute(sql)
         print("SQL FETCH: ", sql, "\n")
@@ -37,11 +59,11 @@ def sql_fetch(sql):
 
 def sql_cmd(sql):
     try:
-        connection = psycopg2.connect(  database="pi1db",
-                                        user="postgres",
-                                        password="postgres",
-                                        host="127.0.0.1",
-                                        port="5432"
+        connection = psycopg2.connect(  database=dbcredential.database,
+                                        user=dbcredential.user,
+                                        password=dbcredential.password,
+                                        host=dbcredential.host,
+                                        port=dbcredential.port
                                     )
         cursor = connection.cursor()
         cursor.execute(sql)
