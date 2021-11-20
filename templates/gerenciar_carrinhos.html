@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br>
+<form class="formlogin" action="/gerenciar/carrinhos" method="POST">
+  <label for="id"> ID: </label>
+  <input type="text" name="id" placeholder="99999" required >
+  &nbsp;
+  <label for="carrinho_nome"> Nome: </label>
+  <input type="text" name="nome" size="16" maxlength="16" placeholder="Carrinho 1" required >
+  &nbsp;
+  <input type="submit" value="Salvar">
+</form>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Ações</th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for carrinho in carrinhos %}
+    <tr>
+      <td> {{ carrinho.id }} </td>
+      <td> {{ carrinho.nome }} </td>
+      <td>
+        <a href="/gerenciar/carrinhos/del/{{carrinho.id}}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

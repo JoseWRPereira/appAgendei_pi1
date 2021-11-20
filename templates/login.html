@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br>
+<br>
+<form class="formlogin" action="/login" method="POST">
+  <label for="username">Usuário:</label>
+    <input list="browsers" name="browser">
+    <datalist id="browsers">
+      {% for usuario in usuarios %}
+        <option value="{{usuario.nome}}"> {{usuario.nome}} ({{usuario.nif}})
+      {% endfor %}
+    </datalist>
+    <br><br>
+    <label for="pwd">Senha : </label>
+    <input type="password" id="pwd" name="pwd">
+    <br><br>
+    <button type="submit"> Acessar</button>
+  </form> 
+
+
+{% endblock %}

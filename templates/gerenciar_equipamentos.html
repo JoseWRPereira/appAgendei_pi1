@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<form class="formlogin" action="/gerenciar/equipamentos" method="POST">
+  <label for="equip_npatr"> Nº Patrimônio: </label>
+  <input type="text" name="equipNumPatr"  size="7" maxlength="10" placeholder="99999" required autofocus>
+  &nbsp;
+  <label for="equip_nome"> Nome: </label>
+  <input type="text" name="equipNome"  size="20" maxlength="30" placeholder="Chromebook 1" required >
+  &nbsp;
+  <label for="equip_descricao"> Descrição: </label>
+  <input type="text" name="equipDescricao" size="30" maxlength="30" placeholder="Notebook Marca X" required><br>
+  <br>
+  <div class="select-block">
+    <label for="equip_carrinho"> Carrinho </label>
+    <select name="equipCarrinho" id="equipCarrinho" required>
+        <option value="">Selecione um carrinho:</option>
+        {% for c in carrinho %}
+        <option value={{c[0]}}>{{c[1]}}</option>
+        {% endfor %}
+      </select>
+  <!-- </div>
+    <div> -->
+    &nbsp;
+    &nbsp;
+    <label for="equip_aquisicao">Data da aquisição:</label>
+    <input type="date" id="equipAquisicao" name="equipAquisicao" >
+  <!-- </div>
+  <div class="select-block"> -->
+    &nbsp;
+    &nbsp;
+    <label for="equip_status"> Status: </label>
+    <select name="equipStatus" id="equipStatus" required>
+        <option value=""> </option>
+        <option value="Manut">Em manutenção</option>
+        <option value="Operando">Operando</option>
+        <option value="Quebrado">Quebrado</option>
+      </select>
+  </div>
+
+
+  <br><br>
+  <input type="submit" value="Salvar">
+</form>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>NumPatrimônio</th>
+      <th>Nome</th>
+      <th>Carrinho</th>
+      <th>Descrição</th>
+      <th>Data de aquisição</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for campo in lista %}
+    <tr>
+      <td> {{ campo[0] }} </td>
+      <td> {{ campo[1] }} </td>
+      <td> {{ campo[2] }} </td>
+      <td> {{ campo[3] }} </td>
+      <td> {{ campo[4] }} </td>
+      <td> {{ campo[5] }} </td>
+        <td>
+        <a href="/gerenciar/equipamentos/del/{{campo[0]}}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+        <title>{% block title %} {% endblock %}</title>
+    </head>
+    <body>
+        <header>
+            <ul id="menu"> 
+                <li><a class="active" href="/createtables">Agendei</a></li>
+                <li><a class="deactive" href="/main">Reservas</a></li>
+                <li><a class="deactive" href="/gerenciar/usuarios">Usuários</a></li>
+                <li><a class="deactive" href="/gerenciar/carrinhos">Carrinhos</a></li>
+                {% if userName!='' %}
+                <li><a class="deactive" href="/agendar">Agendar</a></li>
+                <li><a class="deactive" href="/excluir">Excluir</a></li>
+                {% endif %}
+                {% if userName=='Admin' %}
+                <!-- <li><a class="deactive" href="/gerenciar/disciplinas">Disciplinas</a></li> -->
+                <!-- <li><a class="deactive" href="/gerenciar/usuarios">Usuários</a></li>
+                <li><a class="deactive" href="/gerenciar/carrinhos">Carrinhos</a></li> -->
+                <!-- <li><a class="deactive" href="/gerenciar/equipamentos">Equipamentos</a></li> -->
+                <li><a class="deactive" href="/gerenciar/reservas">Agendamentos</a></li>
+                {% endif %}
+                <lir>
+                    {% if not userName %}
+                        <li><a class="deactive" href="/login">Conecte-se</a></li>
+                    {% else %}
+                        <li><a>{{userName}}</a></li>
+                        <li><a class="deactive" href="/logoff">Sair</a></li>
+                    {% endif %}
+                </lir>
+            </ul>
+        </header>
+        <br>
+        <br>
+        {% block content %} {% endblock %}
+
+        <footer>
+            <br>
+        </footer>
+    </body>
+</html>

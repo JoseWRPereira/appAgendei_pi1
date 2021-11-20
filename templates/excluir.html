@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Período</th>
+      <th>Carrinho</th>
+      <th>Ações</th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for campo in lista %}
+    <tr>
+      <td> {{ campo[1] }} </td>
+      <td> {{ campo[2] }} </td>
+      <td> {{ campo[3] }} </td>
+      <td>
+        <a href="/excluir/{{campo[0]}}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

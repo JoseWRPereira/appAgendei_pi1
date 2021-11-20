@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br>
+<form class="formlogin" action="/gerenciar/usuarios" method="POST">
+  <label for="usuario_nif"> Nº Ident. Funcional: </label>
+  <input type="text" name="nif" size="7" maxlength="10" placeholder="99999" required autofocus>
+  &nbsp;
+  <label for="usuario_nome"> Nome: </label>
+  <input type="text" name="nome" size="30" maxlength="30" placeholder="José da Silva" required>
+  &nbsp;
+  <!-- <label for="usuario_usuarioDisciplina"> Disciplina: </label>
+  <input list="browsers" name="usuarioDisciplina" size="10" maxlength="20" placeholder="Português" required>
+  &nbsp;
+  <datalist id="browsers">
+    {% for d in discip %}
+    <option value={{d[0]}}>{{d[1]}}
+    {% endfor %}
+  </datalist> -->
+  <input type="submit" value="Salvar">
+</form>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>NIF</th>
+      <th>Nome</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for usuario in usuarios %}
+    <tr>
+      <td> {{ usuario[1] }} </td>
+      <td> {{ usuario[2] }} </td>
+      <td>
+        <a href="/gerenciar/usuarios/del/{{usuario[0]}}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

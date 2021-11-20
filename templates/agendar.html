@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table>
+  <tr>
+    <form action="/agendar/datadec" method="POST">
+    <td rowspan="2"><input type="image" class="seta" name="seta" value="esquerda" src="../static/images/icon/setaEsquerda.png" ></td>
+    </form>
+    <td><h3>{{lista[0][0][0]}}</h3></td>
+      <form action="/agendar/datainc" method="POST">
+    <td rowspan="2"><input type="image" class="seta" name="seta" value="direita" src="../static/images/icon/setaDireita.png" ></td>
+    </form>
+  </tr>
+</table>
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Período</th>
+      <th>Carrinho</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in lista %}
+    <tr>
+      <td> {{ l[1] }} </td>
+      <td> {{ l[2] }} </td>
+      <td>
+        <a href="/agendar/carrinho/{{l[2]}}/{{l[1]}}"> Reservar </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

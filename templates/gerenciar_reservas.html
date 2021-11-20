@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<form class="formlogin" action="/gerenciar/reservas" method="POST">
+
+  <label for="calendario">Calendário:</label>
+  <input type="date" id="calendario" name="calendario" autofocus>
+  <!-- <div class="select-block"> -->
+    &nbsp;
+
+  <label for="reserva_periodo"> Período: </label>
+  <select name="periodo" id="periodo" required>
+      <!-- <option value=""> </option> -->
+      <option value="M">Matutino</option>
+      <option value="V">Vespertino</option>
+      <option value="N">Noturno</option>
+    </select>
+
+      &nbsp;
+
+    <label for="carrinho"> Carrinho </label>
+    <select name="car" id="car" required>
+        <option value="">Selecione um Carrinho</option>
+        {% for carrinho in carrinhos %}
+        <option value={{carrinho.id}}>{{carrinho.nome}}</option>
+        {% endfor %}
+      </select>
+  <!-- </div> -->
+  &nbsp;
+
+  <!-- <div class="select-block"> -->
+    <label for="usuario"> Usuário </label>
+    <select name="user" id="user" required>
+        <option value="">Selecione um Usuário</option>
+        {% for usuario in usuarios %}
+        <option value={{usuario.nif}}>{{usuario.nome}}</option>
+        {% endfor %}
+      </select>
+  <!-- </div> -->
+  &nbsp;
+  <input type="submit" value="Salvar">
+</form>
+
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Data</th>
+      <th>Período</th>
+      <th>Carrinho</th>
+      <th>Usuário</th>
+      <th>Ações</th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for reserva in reservas %}
+    <tr>
+      <td> {{ reserva.id }} </td>
+      <td> {{ reserva.calendario }} </td>
+      <td> {{ reserva.periodo }} </td>
+      <td> {{ reserva.carrinho_id }} </td>
+      <td> {{ reserva.usuario_id }} </td>
+      <td>
+        <a href="/gerenciar/reservas/del/{{reserva.id}}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

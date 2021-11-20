@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<br>
+
+  <form class="formlogin" action="/gerenciar/disciplinas" method="POST">
+    <label for="disciplina_id" > Código: </label>
+    <input type="text" name="disciplinaCodigo" size="10" maxlength="10" placeholder="POR" required autofocus >
+    <label for="disciplina_nome" > Nome: </label>
+    <input type="text" name="disciplinaNome" size="30" maxlength="30" placeholder="Português" required>
+    <input type="submit" value="Salvar">
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Disciplina</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for campo in lista %}
+      <tr>
+        <td> {{ campo[0] }} </td>
+        <td> {{ campo[1] }} </td>
+        <td>
+          <a href="/gerenciar/disciplinas/del/{{campo[0]}}">Excluir</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
