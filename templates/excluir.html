@@ -6,17 +6,21 @@
   <thead>
     <tr>
       <th>Data</th>
-      <th>Período</th>
       <th>Carrinho</th>
+      <th>Manhã</th>
+      <th>Tarde</th>
+      <th>Noite</th>
       <th>Ações</th>
       </tr>
   </thead>
   <tbody>
-    {% for campo in lista %}
+    {% for campo in reservas %}
     <tr>
       <td> {{ campo[1] }} </td>
       <td> {{ campo[2] }} </td>
-      <td> {{ campo[3] }} </td>
+      <td> {{ campo[3] if campo[3]==userName else ' '}} </td>
+      <td> {{ campo[4] if campo[4]==userName else ' '}} </td>
+      <td> {{ campo[5] if campo[5]==userName else ' '}} </td>
       <td>
         <a href="/excluir/{{campo[0]}}">Excluir</a>
       </td>

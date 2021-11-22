@@ -1,8 +1,6 @@
 from flask import Flask
 from flask import redirect, url_for, render_template, request
-# import os
 from datetime import date, timedelta, datetime
-# from werkzeug.exceptions import abort
 import psycopg2
 import psycopg2.extras
 from psycopg2 import Error
@@ -92,108 +90,39 @@ class Usuario:
         self.nif = ""
         self.nome = ""
         self.senha = ""
-        
-# class Usuario:
-#     def __init__(self):
-#         self.nif = 0
-#         self.nome = ""
-#         self.senha = ""
-#     def set_nif(self, nif):
-#         self.nif = nif
-#     def set_nome(self,nome):
-#         self.nome = nome
-#     def set_disciplina(self,disciplina):
-#         self.disciplina = disciplina
-#     def set_senha(self,senha):
-#         self.senha = senha
-#     def get_nif(self):
-#         return(self.nif)
-#     def get_nome(self):
-#         return(self.nome)
-#     def get_disciplina(self):
-#         return(self.disciplina)
-#     def get_senha(self):
-#         return(self.senha)
-
 
 class Carrinho:
     def _init__(self):
         self.id = 0
         self.nome = ""
 
-# class Carrinho:
-#     def _init__(self):
-#         self.id=0
-#         self.nome = ""
-#         self.qtd_equipamentos = 0
-#     def set_id(self, id):
-#         self.id = id
-#     def set_nome(self, nome):
-#         self.nome = nome
-#     def set_qtd_equipamentos(self, qtd):
-#         self.qtd_equipamentos = qtd
-#     def get_id(self):
-#         return(self.id)
-#     def get_nome(self):
-#         return(self.nome)
-#     def get_qtd_equipamentos(self):
-#         return(self.qtd_equipamentos)
-        
+class Reserva:
+    def __init__(self):
+        self.data = date.today()
+        self.carrinho = ""
+        self.usuario_manha = ""
+        self.usuario_tarde = ""
+        self.usuario_noite = ""
+        self.periodo = ''
 
-# class Reserva:#( id, data, periodo, carrinho_id, usuario_id
-#     def __init__(self):
-#         self.data = 0
-#         self.periodo = 0
-#         self.carrinho_id = 0
-#         self.usuario_id = 0
-#     def set_data(self,data):
-#         self.data = data
-#     def set_periodo(self,periodo):
-#         self.periodo = periodo
-#     def set_carrinho_id(self,carrinho):
-#         self.carrinho_id = carrinho
-#     def set_usuario_id(self,usuario):
-#         self.usuario_id = usuario
-#     def get_data(self):
-#         return(self.data)
-#     def get_periodo(self):
-#         return(self.periodo)
-#     def get_carrinho_id(self):
-#         return(self.carrinho_id)
-#     def get_usuario_id(self):
-#         return(self.usuario_id)
-    
+
 
 class Calendario:
     def __init__(self):
         self.data = date.today()
         self.delta = 0
-    def set_delta(self, delta):
-        self.delta = delta
-    def get_delta(self):
-        return(self.delta)
     def get_data(self):
         return(self.data + timedelta(days = self.delta))
-    def get_data_today(self):
-        return( date.today() )
+    def inc_delta(self):
+        self.delta = self.delta + 1
+    def dec_delta(self):
+        self.delta = self.delta - 1
 
 class Login:
     def __init__(self):
         self.nome = "Admin"
         self.nif = 1
         self.senha = "admin"
-    # def get_usuario(self):
-    #     return(self.usuario)
-    # def set_usuario(self,user):
-    #     self.usuario = user
-    # def get_nif(self):
-    #     return(self.nif)
-    # def set_nif(self,nif):
-    #     self.nif = nif
-    # def get_pwd(self):
-    #     return(self.pwd)
-    # def set_pwd(self,pwd):
-    #     self.pwd = pwd
 
 
 
@@ -202,10 +131,6 @@ class Login:
 ################################################################ Instanciamento
 ###############################################################################
 app = Flask(__name__)
-
-# usuario = Usuario()
-# carrinho = Carrinho()
-# reserva = Reserva()
 calendario = Calendario()
 login = Login()
 
@@ -230,33 +155,18 @@ def index():
 
 @app.route("/main")
 def main():
-    # data1 = calendario.get_data()
-    # sql = "SELECT id,data,periodo,carrinho_id,usuario_id FROM reserva WHERE data='{}';".format(data1)
-    # lista1 = db_cmd(sql)
-
-    # calendario.set_delta( calendario.get_delta()+1 )
-    # data2 = calendario.get_data()
-    # sql = "SELECT id,data,periodo,carrinho_id,usuario_id FROM reserva WHERE data='{}';".format(data2)
-    # lista2 = db_cmd(sql)
-
-    # calendario.set_delta( calendario.get_delta()+1 )
-    # data3 = calendario.get_data()
-    # sql = "SELECT id,data,periodo,carrinho_id,usuario_id FROM reserva WHERE data='{}';".format(data3)
-    # lista3 = db_cmd(sql)
-
-    # calendario.set_delta( calendario.get_delta()-2 )
-    # data = calendario.get_data()
-    # return render_template('main.html', userName=acesso.get_usuario(), lista1=lista1, data1=data1, lista2=lista2, data2=data2, lista3=lista3, data3=data3, data=data )
-    return render_template('main.html', userName=login.nome )
+    data = str(calendario.get_data())
+    reservas = sql_fetch("SELECT id,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE data='{}' ORDER BY carrinho DESC;".format(data) )
+    return render_template('main.html', userName=login.nome, data=data, reservas=reservas )
 
 @app.route("/main/datadec", methods=['GET','POST'])
 def maindatadec():
-    calendario.set_delta( calendario.get_delta()-1 )
+    calendario.dec_delta()
     return redirect(url_for('main'))
 
 @app.route("/main/datainc", methods=['GET','POST'])
 def maindatainc():
-    calendario.set_delta( calendario.get_delta()+1 )
+    calendario.inc_delta()
     return redirect(url_for('main'))
 
 
@@ -266,103 +176,122 @@ def maindatainc():
 ###############################################################################
 ######################################################################### login
 ###############################################################################
-# @app.route("/login")
-# def login():
-#     sql = "SELECT nif,nome FROM usuario;"
-#     user = db_cmd(sql)
-#     return render_template('login.html', user=user, userName=acesso.get_usuario() )
+@app.route("/login", methods=['GET','POST'])
+def logon():
+    if request.method == 'POST':
+        usuario         = Usuario()
+        usuario.nome    = str( request.form['user'])
+        usuario.senha   = str( request.form['pwd'])
+        user = sql_fetch("SELECT id,nif,nome,senha FROM usuario WHERE nome='{}';".format(usuario.nome))
+        if user[0][3]==usuario.senha:
+            login.nome = user[0][2]
+            login.nif = user[0][1]
+            return redirect(url_for('index'))
+        else:
+            login.nome = ""
+            login.nif = ""
+            return redirect(url_for('loginerror'))
+    else:
+        usuarios = sql_fetch("SELECT id,nif,nome FROM usuario;")
+        return render_template('login.html', userName=login.nome, usuarios=usuarios)
 
-# @app.route("/login/validar", methods=['GET','POST'])
-# def loginvalidar():
-#     if request.method == 'POST':
-#         acesso.set_usuario(request.form['browser'])
-#         acesso.set_pwd(request.form['pwd'])
-#         sql = "SELECT nif FROM usuario WHERE nome='{}';".format(acesso.get_usuario())
-#         nif = db_cmd(sql)
-#         acesso.set_nif( nif[0][0] )
+@app.route("/loginerror")
+def loginerror():
+    return render_template('login_error.html')
 
-#         sql = "SELECT senha FROM usuario WHERE nif='{}';".format(acesso.get_nif() )
-#         senha = db_cmd(sql)
-#         # return "{} == {}".format( senha[0][0], acesso.get_pwd() )
-#         if senha[0][0] == acesso.get_pwd():
-#             return redirect(url_for('agendar'))
-#         else:
-#             acesso.set_usuario("")
-#             return redirect(url_for('loginerror'))
-
-# @app.route("/loginerror")
-# def loginerror():
-#     return render_template('login_error.html')
-
-
-# @app.route("/logoff")
-# def logoff():
-#     acesso.set_nif(0)
-#     acesso.set_pwd("")
-#     acesso.set_usuario("")
-#     return redirect(url_for('index'))
+@app.route("/logoff")
+def logoff():
+    login.nif = 0
+    login.nome = ''
+    login.senha = ''
+    return redirect(url_for('index'))
 
 
 ###############################################################################
 ####################################################################### agendar
 ###############################################################################
-# @app.route("/agendar")
-# def agendar():
-#     data = calendario.get_data()
-#     sql = "SELECT id,nome FROM carrinho;"
-#     listaCarrinhos = db_cmd(sql)
-#     sql = "SELECT periodo,carrinho_id,usuario_id FROM reserva where data='{}' ORDER BY carrinho_id;".format(data)
-#     listaReservas = db_cmd(sql)
-#     listaPeriodos = (['M','Matutino'],['V','Vespertino'],['N','Noturno'])
-#     lista = []
-#     achei = 0
-#     for p in listaPeriodos:
-#         for c in listaCarrinhos:
-#             achei = 0
-#             for l in listaReservas:
-#                 if p[0]==l[0] and c[0]==l[1]:
-#                     achei = 1
-#                     break
-#             if not achei:
-#                 dt = []
-#                 # dt.append( datetime.now().strftime("%Y-%m-%d") )
-#                 dt.append( data )
-#                 lista.append( (dt,str(p[0]),str(c[0])) )
-#     return render_template('agendar.html', lista=lista, userName=acesso.get_usuario() )
+@app.route("/agendar")
+def agendar():
+    data = str(calendario.get_data())
+    carrinhos = sql_fetch("SELECT id,nome FROM carrinho;")
+    listas = []
+    for car in carrinhos:
+        lista = []
+        res = sql_fetch("SELECT usuario_manha, usuario_tarde, usuario_noite, id FROM reserva WHERE data='{}' AND carrinho='{}';".format(data, car[0]))
+        try:
+            m = res[0][0] if res[0][0]!=None else '@'
+            v = res[0][1] if res[0][1]!=None else '@'
+            n = res[0][2] if res[0][2]!=None else '@'
+            rid = res[0][3]
+            cmd = 'UPDATE'
+        except:
+            m = '@'
+            v = '@'
+            n = '@'
+            rid = None
+            cmd = 'INSERT'
+        lista.insert(0, rid )
+        lista.insert(1, car[0] )
+        lista.insert(2, m )
+        lista.insert(3, v )
+        lista.insert(4, n )
+        lista.insert(5, cmd)
+        listas.append(lista)
+    return render_template('agendar.html', userName=login.nome, data=data, carrinhos=carrinhos, listas=listas )
 
+@app.route("/agendar/datadec", methods=['GET','POST'])
+def agendardatadec():
+    calendario.dec_delta()
+    return redirect(url_for('agendar'))
 
-# @app.route("/agendar/datadec", methods=['GET','POST'])
-# def agendardatadec():
-#     calendario.set_delta( calendario.get_delta()-1 )
-#     return redirect(url_for('agendar'))
+@app.route("/agendar/datainc", methods=['GET','POST'])
+def agendardatainc():
+    calendario.inc_delta()
+    return redirect(url_for('agendar'))
 
-# @app.route("/agendar/datainc", methods=['GET','POST'])
-# def agendardatainc():
-#     calendario.set_delta( calendario.get_delta()+1 )
-#     return redirect(url_for('agendar'))
+@app.route("/agendar/carrinho/<id>/<car>/<periodo>/<cmd>", methods=['GET','POST'])
+def agendarcarrinho(id, car, periodo, cmd):
+    data = str(calendario.get_data())
 
-# @app.route("/agendar/carrinho/<id>/<periodo>", methods=['GET','POST'])
-# def agendarcarrinho(id, periodo):
-#     sql =  "INSERT INTO reserva (data, periodo, carrinho_id, usuario_id) VALUES ('{}','{}',{},'{}');".format(str(calendario.get_data()), str(periodo),int(id), int(acesso.get_nif()) )
-#     db_cmd(sql)
-#     return redirect(url_for('agendar'))
+    if 'INSERT' in cmd:
+        if 'm' in periodo:
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+        elif 'v' in periodo:
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+        elif 'n' in periodo:
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+    elif 'UPDATE' in cmd:
+        if 'm' in periodo:
+            sql_cmd("UPDATE reserva SET usuario_manha='{}' WHERE id='{}';".format( login.nome, id ) )
+        elif 'v' in periodo:
+            sql_cmd("UPDATE reserva SET usuario_tarde='{}' WHERE id='{}';".format( login.nome, id ) )
+        elif 'n' in periodo:
+            sql_cmd("UPDATE reserva SET usuario_noite='{}' WHERE id='{}';".format( login.nome, id ) )
+
+    return redirect(url_for('agendar'))
 
 
 
 ###############################################################################
 ####################################################################### excluir
 ###############################################################################
-# @app.route("/excluir")
-# def excluir():
-#     sql = "SELECT id,data,periodo,carrinho_id FROM reserva WHERE usuario_id='{}' AND data>='{}';".format(acesso.get_nif(), calendario.get_data_today() )
-#     lista = db_cmd(sql)
-#     return render_template('excluir.html', lista=lista, userName=acesso.get_usuario() )
+@app.route("/excluir")
+def excluir():
+    reservas = sql_fetch("SELECT id,data,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE usuario_manha='{}' OR usuario_tarde='{}' OR usuario_noite='{}' AND data>='{}' ORDER BY data DESC;".format( login.nome, login.nome, login.nome, calendario.data ) )
+    
+    return render_template('excluir.html', userName=login.nome, reservas=reservas )
 
-# @app.route("/excluir/<id>")
-# def excluir_id(id):
-#     sql = "DELETE FROM reserva WHERE id='{}';".format(id)
-#     db_cmd(sql)
-#     return redirect(url_for('excluir'))
+@app.route("/excluir/<id>")
+def excluir_id(id):
+    users = sql_fetch("SELECT usuario_manha, usuario_tarde, usuario_noite FROM reserva WHERE id='{}';".format(id))
+    # return "{} {} {} : {} : {} {} {}".format(users[0][0], users[0][1], users[0][2], login.nome, login.nome == users[0][0], login.nome == users[0][1], login.nome == users[0][2])
+    if login.nome == users[0][0]:
+        sql_cmd("UPDATE reserva SET usuario_manha=NULL WHERE id='{}';".format(id) )
+    if login.nome == users[0][1]:
+        sql_cmd("UPDATE reserva SET usuario_tarde=NULL WHERE id='{}';".format(id) )
+    if login.nome == users[0][2]:
+        sql_cmd("UPDATE reserva SET usuario_noite=NULL WHERE id='{}';".format(id) )
+    return redirect(url_for('excluir'))
 
 
 ###############################################################################
@@ -424,36 +353,36 @@ def gerenciarcarrinhosdel(id):
 
 ###############################################################################
 ############################################################ Gerenciar reservas
-###### (id), data, periodo, carrinho_id->carrinho(id), usuario_id->usuario(nif)
+###### id, data, carrinho, userM, userV, userN
 ###############################################################################
-# @app.route("/gerenciar/reservas", methods=['GET','POST'])
-# def gerenciarreservas():
-#     if request.method == 'POST':
-#         reserva.set_data(request.form['calendario'])
-#         reserva.set_periodo(request.form['periodo'])
-#         reserva.set_carrinho_id(request.form['carrinho'])
-#         reserva.set_usuario_id(request.form['usuario'])
-#         return redirect(url_for('gerenciarreservasadd'))
-#     else:
-#         sql = "SELECT id,nome FROM carrinho;"
-#         carrinho = db_cmd(sql)
-#         sql = "SELECT nif,nome FROM usuario;"
-#         usuario = db_cmd(sql)
-#         sql = "SELECT * FROM reserva ORDER BY id DESC;"
-#         lista = db_cmd(sql)
-#         return render_template('gerenciar_reservas.html', lista=lista, carrinho=carrinho, usuario=usuario, userName=acesso.get_usuario())
+@app.route("/gerenciar/reservas", methods=['GET','POST'])
+def gerenciarreservas():
+    if request.method == 'POST':
+        reserva = Reserva()
+        reserva.data = request.form['calendario']
+        reserva.periodo = str(request.form['periodo'])
+        reserva.carrinho = str(request.form['car'])
+        if reserva.periodo == 'M':
+            reserva.usuario_manha = request.form['usuario']
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_manha ) )
+        elif reserva.periodo == 'V':
+            reserva.usuario_tarde = request.form['usuario']
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_tarde ) )
+        else:
+            reserva.usuario_noite = request.form['usuario']
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_noite ) )
+        return redirect(url_for('gerenciarreservas'))
+    else:
+        carrinhos = sql_fetch("SELECT id,nome FROM carrinho;")
+        usuarios = sql_fetch("SELECT nif,nome FROM usuario;")
+        reservas = sql_fetch("SELECT * FROM reserva ORDER BY id DESC;")
+        return render_template('gerenciar_reservas.html', userName=login.nome, carrinhos=carrinhos, usuarios=usuarios, reservas=reservas)
 
-# @app.route("/gerenciar/reservas/add")
-# def gerenciarreservasadd():
-#     sql =  "INSERT INTO reserva (data, periodo, carrinho_id, usuario_id) VALUES ('{}','{}','{}','{}');".format(str(reserva.get_data()), str(reserva.get_periodo()),str(reserva.get_carrinho_id()), str(reserva.get_usuario_id()) )
-#     db_cmd(sql)
-#     return redirect(url_for('gerenciarreservas'))
 
-# @app.route("/gerenciar/reservas/del/<id>", methods=['GET', 'POST'])
-# def gerenciarreservasdel(id):
-#     sql = "DELETE FROM reserva WHERE id='{}';".format(id)
-#     db_cmd(sql)
-#     return redirect(url_for('gerenciarreservas'))
+@app.route("/gerenciar/reservas/del/<id>")
+def gerenciarreservasdel(id):
+    sql_cmd("DELETE FROM reserva WHERE id='{}';".format(id))
+    return redirect(url_for('gerenciarreservas'))
 
 
 
@@ -463,10 +392,12 @@ def gerenciarcarrinhosdel(id):
 
 @app.route("/resetdb")
 def resetdb():
+    sql_cmd("DROP TABLE IF EXISTS reserva;")
     sql_cmd("DROP TABLE IF EXISTS carrinho;")
     sql_cmd("DROP TABLE IF EXISTS usuario;")
-    sql_cmd("CREATE TABLE IF NOT EXISTS usuario ( id SERIAL PRIMARY KEY, nif INTEGER, nome TEXT, senha TEXT );")
-    sql_cmd("CREATE TABLE IF NOT EXISTS carrinho( id SERIAL PRIMARY KEY, nome TEXT );")
+    sql_cmd("CREATE TABLE IF NOT EXISTS usuario  ( id SERIAL PRIMARY KEY, nif INTEGER, nome TEXT, senha TEXT );")
+    sql_cmd("CREATE TABLE IF NOT EXISTS carrinho ( id SERIAL PRIMARY KEY, nome TEXT );")
+    sql_cmd("CREATE TABLE IF NOT EXISTS reserva  ( id SERIAL PRIMARY KEY, data DATE, carrinho TEXT, usuario_manha TEXT, usuario_tarde TEXT, usuario_noite TEXT );")
     sql_cmd("INSERT INTO usuario ( nif, nome, senha) VALUES ('{}','{}','{}');".format( 1,"Admin", "admin" ) )
     return redirect(url_for('index'))
 

@@ -16,7 +16,30 @@
 
 
 
-<div id="div1" style="display: flex;">
+<table>
+  <thead>
+    <tr>
+      <th>Carrinho</th>
+      <th>Manhã</th>
+      <th>Tarde</th>
+      <th>Noite</th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for reserva in reservas %}
+    <tr>
+      <td> {{ reserva[1] }} </td>
+      <td> {{ reserva[2] if reserva[2] != None else ' '}} </td>
+      <td> {{ reserva[3] if reserva[3] != None else ' '}} </td>
+      <td> {{ reserva[4] if reserva[4] != None else ' '}} </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
+<!-- <div id="div1" style="display: flex;">
 <table id="tab1" style="width: min-content;" >
   <thead>
     <tr>
@@ -90,9 +113,7 @@
     {% endfor %}
   </tbody>
 </table>
-
-
-</div>    
+</div>   -->  
 
 {% endblock %}
 

@@ -7,7 +7,7 @@
     <form action="/agendar/datadec" method="POST">
     <td rowspan="2"><input type="image" class="seta" name="seta" value="esquerda" src="../static/images/icon/setaEsquerda.png" ></td>
     </form>
-    <td><h3>{{lista[0][0][0]}}</h3></td>
+    <td><h3>{{data}}</h3></td>
       <form action="/agendar/datainc" method="POST">
     <td rowspan="2"><input type="image" class="seta" name="seta" value="direita" src="../static/images/icon/setaDireita.png" ></td>
     </form>
@@ -18,22 +18,39 @@
 <table>
   <thead>
     <tr>
-      <th>Período</th>
       <th>Carrinho</th>
-      <th>Ações</th>
-    </tr>
+      <th>Manhã</th>
+      <th>Tarde</th>
+      <th>Noite</th>
+      </tr>
   </thead>
   <tbody>
-    {% for l in lista %}
+    {% for lista in listas %}
     <tr>
-      <td> {{ l[1] }} </td>
-      <td> {{ l[2] }} </td>
-      <td>
-        <a href="/agendar/carrinho/{{l[2]}}/{{l[1]}}"> Reservar </a>
-      </td>
+      <td> {{ lista[1] }} </td>
+
+      {% if lista[2] != '@': %}
+      <td> {{ lista[2] }} </td>
+      {% else: %}
+      <td><a href="/agendar/carrinho/{{lista[0]}}/{{lista[1]}}/'m'/'{{lista[5]}}'"> Reservar </a></td>
+      {% endif %}
+
+      {% if lista[3] != '@': %}
+      <td> {{ lista[3] }} </td>
+      {% else: %}
+      <td><a href="/agendar/carrinho/{{lista[0]}}/{{lista[1]}}/'v'/'{{lista[5]}}'"> Reservar </a></td>
+      {% endif %}
+
+      {% if lista[4] != '@': %}
+      <td> {{ lista[4] }} </td>
+      {% else: %}
+      <td><a href="/agendar/carrinho/{{lista[0]}}/{{lista[1]}}/'n'/'{{lista[5]}}'"> Reservar </a></td>
+      {% endif %}
+
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 
 {% endblock %}

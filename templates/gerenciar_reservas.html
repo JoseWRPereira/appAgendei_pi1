@@ -11,7 +11,6 @@
 
   <label for="reserva_periodo"> Período: </label>
   <select name="periodo" id="periodo" required>
-      <!-- <option value=""> </option> -->
       <option value="M">Matutino</option>
       <option value="V">Vespertino</option>
       <option value="N">Noturno</option>
@@ -23,7 +22,7 @@
     <select name="car" id="car" required>
         <option value="">Selecione um Carrinho</option>
         {% for carrinho in carrinhos %}
-        <option value={{carrinho.id}}>{{carrinho.nome}}</option>
+        <option value={{carrinho[0]}}>{{carrinho[1]}}</option>
         {% endfor %}
       </select>
   <!-- </div> -->
@@ -31,10 +30,10 @@
 
   <!-- <div class="select-block"> -->
     <label for="usuario"> Usuário </label>
-    <select name="user" id="user" required>
+    <select name="usuario" id="usuario" required>
         <option value="">Selecione um Usuário</option>
         {% for usuario in usuarios %}
-        <option value={{usuario.nif}}>{{usuario.nome}}</option>
+        <option value={{usuario[1]}}>{{usuario[1]}}</option>
         {% endfor %}
       </select>
   <!-- </div> -->
@@ -50,22 +49,24 @@
     <tr>
       <th>ID</th>
       <th>Data</th>
-      <th>Período</th>
       <th>Carrinho</th>
-      <th>Usuário</th>
+      <th>Manhã</th>
+      <th>Tarde</th>
+      <th>Noite</th>
       <th>Ações</th>
       </tr>
   </thead>
   <tbody>
     {% for reserva in reservas %}
     <tr>
-      <td> {{ reserva.id }} </td>
-      <td> {{ reserva.calendario }} </td>
-      <td> {{ reserva.periodo }} </td>
-      <td> {{ reserva.carrinho_id }} </td>
-      <td> {{ reserva.usuario_id }} </td>
+      <td> {{ reserva[0] }} </td>
+      <td> {{ reserva[1] }} </td>
+      <td> {{ reserva[2] }} </td>
+      <td> {{ reserva[3] if reserva[3] != None else ' '}} </td>
+      <td> {{ reserva[4] if reserva[4] != None else ' '}} </td>
+      <td> {{ reserva[5] if reserva[5] != None else ' '}} </td>
       <td>
-        <a href="/gerenciar/reservas/del/{{reserva.id}}">Excluir</a>
+        <a href="/gerenciar/reservas/del/{{reserva[0]}}">Excluir</a>
       </td>
     </tr>
     {% endfor %}

@@ -6,10 +6,10 @@
 <br>
 <form class="formlogin" action="/login" method="POST">
   <label for="username">Usuário:</label>
-    <input list="browsers" name="browser">
+    <input list="browsers" name="user">
     <datalist id="browsers">
       {% for usuario in usuarios %}
-        <option value="{{usuario.nome}}"> {{usuario.nome}} ({{usuario.nif}})
+        <option value="{{usuario[2]}}"> {{usuario[2]}} ({{usuario[1]}})
       {% endfor %}
     </datalist>
     <br><br>
