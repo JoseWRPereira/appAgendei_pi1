@@ -142,9 +142,6 @@ login = Login()
 
 @app.route("/")
 def index():
-    login.nome = ''
-    login.senha = ''
-    login.nif = 0
     return render_template('index.html', userName=login.nome )
 
 
