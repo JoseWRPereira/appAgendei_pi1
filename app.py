@@ -22,13 +22,13 @@ class DBCredential_local:
 
 class DBCredential_online:
     def __init__(self):
-        self.host = 'ec2-35-168-80-116.compute-1.amazonaws.com'
-        self.database = 'db11rl4t5fok51'
-        self.user = 'mkquynsqfbowgn'
+        self.host = 'ec2-52-20-143-167.compute-1.amazonaws.com'
+        self.database = 'd1f1r9u6nff5vk'
+        self.user = 'kgjlgrirpawegc'
         self.port = '5432'
-        self.password = '9ab6e907db802c1d080322a55145014df75063d39e3aa405a244a6a7cf4e1524'
-        self.uri = 'postgres://mkquynsqfbowgn:9ab6e907db802c1d080322a55145014df75063d39e3aa405a244a6a7cf4e1524@ec2-35-168-80-116.compute-1.amazonaws.com:5432/db11rl4t5fok51'
-        self.heroku_cli = 'heroku pg:psql postgresql-reticulated-70968 --app agendei-pi1'
+        self.password = 'b6e2ce9c166a323946076f92d4cf13911b342f777555a391e7cc599208f83b39'
+        self.uri = 'postgres://kgjlgrirpawegc:b6e2ce9c166a323946076f92d4cf13911b342f777555a391e7cc599208f83b39@ec2-52-20-143-167.compute-1.amazonaws.com:5432/d1f1r9u6nff5vk'
+        self.heroku_cli = 'heroku pg:psql postgresql-octagonal-47192 --app agendei-pi1'
 
 
 dbcredential = DBCredential_online()
