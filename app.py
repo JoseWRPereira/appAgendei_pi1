@@ -120,9 +120,9 @@ class Calendario:
 
 class Login:
     def __init__(self):
-        self.nome = "Admin"
-        self.nif = 1
-        self.senha = "admin"
+        self.nome = ""
+        self.nif = 0
+        self.senha = ""
 
 
 
@@ -142,6 +142,9 @@ login = Login()
 
 @app.route("/")
 def index():
+    login.nome = ''
+    login.senha = ''
+    login.nif = 0
     return render_template('index.html', userName=login.nome )
 
 
