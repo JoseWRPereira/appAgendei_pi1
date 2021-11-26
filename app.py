@@ -38,7 +38,7 @@ class DBCredential_online:
         self.heroku_cli = 'heroku pg:psql postgresql-octagonal-47192 --app agendei-pi1'
 
 
-dbcredential = DBCredential_local()
+dbcredential = DBCredential_online()
 
 def sql_fetch(sql):
     try:
