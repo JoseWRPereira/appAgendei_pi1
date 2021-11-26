@@ -1,10 +1,17 @@
 from flask import Flask
 from flask import redirect, url_for, render_template, request
-from datetime import date, timedelta, datetime
+from flask import session, flash
+from datetime import date, timedelta
 import psycopg2
 import psycopg2.extras
 from psycopg2 import Error
 
+
+
+#### VER
+# Sesseions
+# https://www.youtube.com/watch?v=ddjT_Gdp_cc
+# https://www.youtube.com/watch?v=iIhAfX4iek0
 
 
 ###############################################################################
@@ -31,7 +38,7 @@ class DBCredential_online:
         self.heroku_cli = 'heroku pg:psql postgresql-octagonal-47192 --app agendei-pi1'
 
 
-dbcredential = DBCredential_online()
+dbcredential = DBCredential_local()
 
 def sql_fetch(sql):
     try:
@@ -107,22 +114,7 @@ class Reserva:
 
 
 
-class Calendario:
-    def __init__(self):
-        self.data = date.today()
-        self.delta = 0
-    def get_data(self):
-        return(self.data + timedelta(days = self.delta))
-    def inc_delta(self):
-        self.delta = self.delta + 1
-    def dec_delta(self):
-        self.delta = self.delta - 1
 
-class Login:
-    def __init__(self):
-        self.nome = ""
-        self.nif = 0
-        self.senha = ""
 
 
 
@@ -131,10 +123,54 @@ class Login:
 ################################################################ Instanciamento
 ###############################################################################
 app = Flask(__name__)
-calendario = Calendario()
-login = Login()
+app.secret_key = "agendei_pi1"
 
 
+
+###############################################################################
+######################################################################### login
+###############################################################################
+@app.route("/login", methods=['GET','POST'])
+def logon():
+    if request.method == 'POST':
+        nome    = str( request.form['user'])
+        senha   = str( request.form['pwd'])
+        user = sql_fetch("SELECT id,nif,nome,senha FROM usuario WHERE nome='{}';".format(nome))
+        if user and user[0][3]==senha:
+            session['username'] = request.form['user']
+            session['nif'] = user[0][1]
+            return redirect(url_for('index'))
+        else:
+            session['username'] = None
+            session['nif'] = None
+            return redirect(url_for('loginerror'))
+    else:
+        usuarios = sql_fetch("SELECT id,nif,nome FROM usuario;")
+        return render_template('login.html', usuarios=usuarios)
+
+@app.route("/loginerror")
+def loginerror():
+    return render_template('login_error.html')
+
+@app.route("/logoff")
+def logoff():
+    session.pop('username', None)
+    session.pop('data', None )
+    session.pop('delta', None)
+    return redirect(url_for('index'))
+
+
+
+
+###############################################################################
+######################################################################### data
+###############################################################################
+def get_data():
+    return(date.today() + timedelta(days = session['delta']))
+def inc_delta():
+    session['delta'] = session['delta'] + 1
+def dec_delta():
+    session['delta'] = session['delta'] - 1
 
 ###############################################################################
 ######################################################################### index
@@ -142,7 +178,9 @@ login = Login()
 
 @app.route("/")
 def index():
-    return render_template('index.html', userName=login.nome )
+    session['data'] = date.today()
+    session['delta'] = 0
+    return render_template('index.html')
 
 
 
@@ -153,66 +191,33 @@ def index():
 ########################################################################## main
 ###############################################################################
 
-@app.route("/main")
+@app.route("/main/")
 def main():
-    data = str(calendario.get_data())
-    reservas = sql_fetch("SELECT id,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE data='{}' ORDER BY carrinho DESC;".format(data) )
-    return render_template('main.html', userName=login.nome, data=data, reservas=reservas )
+    reservas = sql_fetch("SELECT id,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE data='{}' ORDER BY carrinho DESC;".format(get_data()) )
+    return render_template('main.html', data=get_data(), reservas=reservas )
 
 @app.route("/main/datadec", methods=['GET','POST'])
 def maindatadec():
-    calendario.dec_delta()
+    dec_delta()
     return redirect(url_for('main'))
 
 @app.route("/main/datainc", methods=['GET','POST'])
 def maindatainc():
-    calendario.inc_delta()
+    inc_delta()
     return redirect(url_for('main'))
 
 
 
-
-
-###############################################################################
-######################################################################### login
-###############################################################################
-@app.route("/login", methods=['GET','POST'])
-def logon():
-    if request.method == 'POST':
-        usuario         = Usuario()
-        usuario.nome    = str( request.form['user'])
-        usuario.senha   = str( request.form['pwd'])
-        user = sql_fetch("SELECT id,nif,nome,senha FROM usuario WHERE nome='{}';".format(usuario.nome))
-        if user[0][3]==usuario.senha:
-            login.nome = user[0][2]
-            login.nif = user[0][1]
-            return redirect(url_for('index'))
-        else:
-            login.nome = ""
-            login.nif = ""
-            return redirect(url_for('loginerror'))
-    else:
-        usuarios = sql_fetch("SELECT id,nif,nome FROM usuario;")
-        return render_template('login.html', userName=login.nome, usuarios=usuarios)
-
-@app.route("/loginerror")
-def loginerror():
-    return render_template('login_error.html')
-
-@app.route("/logoff")
-def logoff():
-    login.nif = 0
-    login.nome = ''
-    login.senha = ''
-    return redirect(url_for('index'))
 
 
 ###############################################################################
 ####################################################################### agendar
 ###############################################################################
-@app.route("/agendar")
+@app.route("/agendar/")
 def agendar():
-    data = str(calendario.get_data())
+    if session['delta'] < 0:
+        session['delta'] = 0
+    data = str(get_data())
     carrinhos = sql_fetch("SELECT id,nome FROM carrinho;")
     listas = []
     for car in carrinhos:
@@ -237,36 +242,39 @@ def agendar():
         lista.insert(4, n )
         lista.insert(5, cmd)
         listas.append(lista)
-    return render_template('agendar.html', userName=login.nome, data=data, carrinhos=carrinhos, listas=listas )
+    return render_template('agendar.html', data=data, carrinhos=carrinhos, listas=listas )
 
 @app.route("/agendar/datadec", methods=['GET','POST'])
 def agendardatadec():
-    calendario.dec_delta()
+    if session['delta'] < 0:
+        session['delta'] = 0
+    else:
+        dec_delta()
     return redirect(url_for('agendar'))
 
 @app.route("/agendar/datainc", methods=['GET','POST'])
 def agendardatainc():
-    calendario.inc_delta()
+    inc_delta()
     return redirect(url_for('agendar'))
 
 @app.route("/agendar/carrinho/<id>/<car>/<periodo>/<cmd>", methods=['GET','POST'])
 def agendarcarrinho(id, car, periodo, cmd):
-    data = str(calendario.get_data())
+    data = str(get_data())
 
     if 'INSERT' in cmd:
         if 'm' in periodo:
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(data, car, session['username'] ) )
         elif 'v' in periodo:
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(data, car, session['username'] ) )
         elif 'n' in periodo:
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(data, car, login.nome ) )
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(data, car, session['username'] ) )
     elif 'UPDATE' in cmd:
         if 'm' in periodo:
-            sql_cmd("UPDATE reserva SET usuario_manha='{}' WHERE id='{}';".format( login.nome, id ) )
+            sql_cmd("UPDATE reserva SET usuario_manha='{}' WHERE id='{}';".format( session['username'], id ) )
         elif 'v' in periodo:
-            sql_cmd("UPDATE reserva SET usuario_tarde='{}' WHERE id='{}';".format( login.nome, id ) )
+            sql_cmd("UPDATE reserva SET usuario_tarde='{}' WHERE id='{}';".format( session['username'], id ) )
         elif 'n' in periodo:
-            sql_cmd("UPDATE reserva SET usuario_noite='{}' WHERE id='{}';".format( login.nome, id ) )
+            sql_cmd("UPDATE reserva SET usuario_noite='{}' WHERE id='{}';".format( session['username'], id ) )
 
     return redirect(url_for('agendar'))
 
@@ -277,19 +285,17 @@ def agendarcarrinho(id, car, periodo, cmd):
 ###############################################################################
 @app.route("/excluir")
 def excluir():
-    reservas = sql_fetch("SELECT id,data,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE usuario_manha='{}' OR usuario_tarde='{}' OR usuario_noite='{}' AND data>='{}' ORDER BY data DESC;".format( login.nome, login.nome, login.nome, calendario.data ) )
-    
-    return render_template('excluir.html', userName=login.nome, reservas=reservas )
+    reservas = sql_fetch("SELECT id,data,carrinho,usuario_manha,usuario_tarde,usuario_noite FROM reserva WHERE (usuario_manha='{}' OR usuario_tarde='{}' OR usuario_noite='{}') AND data>='{}' ORDER BY data DESC;".format( session['username'], session['username'], session['username'], date.today() ) )
+    return render_template('excluir.html', reservas=reservas )
 
 @app.route("/excluir/<id>")
 def excluir_id(id):
     users = sql_fetch("SELECT usuario_manha, usuario_tarde, usuario_noite FROM reserva WHERE id='{}';".format(id))
-    # return "{} {} {} : {} : {} {} {}".format(users[0][0], users[0][1], users[0][2], login.nome, login.nome == users[0][0], login.nome == users[0][1], login.nome == users[0][2])
-    if login.nome == users[0][0]:
+    if session['username'] == users[0][0]:
         sql_cmd("UPDATE reserva SET usuario_manha=NULL WHERE id='{}';".format(id) )
-    if login.nome == users[0][1]:
+    if session['username'] == users[0][1]:
         sql_cmd("UPDATE reserva SET usuario_tarde=NULL WHERE id='{}';".format(id) )
-    if login.nome == users[0][2]:
+    if session['username'] == users[0][2]:
         sql_cmd("UPDATE reserva SET usuario_noite=NULL WHERE id='{}';".format(id) )
     return redirect(url_for('excluir'))
 
@@ -314,7 +320,7 @@ def gerenciarusuarios():
         return redirect(url_for('gerenciarusuarios'))
     else:
         usuarios = sql_fetch("SELECT id,nif,nome FROM usuario;")
-        return render_template('gerenciar_usuarios.html', userName=login.nome, usuarios=usuarios )
+        return render_template('gerenciar_usuarios.html', usuarios=usuarios )
 
 
 @app.route("/gerenciar/usuarios/del/<id>")
@@ -339,7 +345,7 @@ def gerenciarcarrinhos():
         return redirect(url_for('gerenciarcarrinhos'))
     else:
         carrinhos = sql_fetch("SELECT id,nome FROM carrinho;")
-        return render_template('gerenciar_carrinhos.html', userName=login.nome, carrinhos=carrinhos )
+        return render_template('gerenciar_carrinhos.html', carrinhos=carrinhos )
 
 
 @app.route("/gerenciar/carrinhos/del/<id>")
@@ -358,25 +364,25 @@ def gerenciarcarrinhosdel(id):
 @app.route("/gerenciar/reservas", methods=['GET','POST'])
 def gerenciarreservas():
     if request.method == 'POST':
-        reserva = Reserva()
-        reserva.data = request.form['calendario']
-        reserva.periodo = str(request.form['periodo'])
-        reserva.carrinho = str(request.form['car'])
-        if reserva.periodo == 'M':
-            reserva.usuario_manha = request.form['usuario']
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_manha ) )
-        elif reserva.periodo == 'V':
-            reserva.usuario_tarde = request.form['usuario']
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_tarde ) )
+        # reserva = Reserva()
+        data = request.form['calendario']
+        periodo = str(request.form['periodo'])
+        carrinho = str(request.form['car'])
+        if periodo == 'M':
+            usuario_manha = str(request.form['user'])
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_manha) VALUES ('{}','{}','{}');".format(data, carrinho, usuario_manha ) )
+        elif periodo == 'V':
+            usuario_tarde = str(request.form['user'])
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_tarde) VALUES ('{}','{}','{}');".format(data, carrinho, usuario_tarde ) )
         else:
-            reserva.usuario_noite = request.form['usuario']
-            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(reserva.data, reserva.carrinho, reserva.usuario_noite ) )
+            usuario_noite = str(request.form['user'])
+            sql_cmd("INSERT INTO reserva (data, carrinho, usuario_noite) VALUES ('{}','{}','{}');".format(data, carrinho, usuario_noite ) )
         return redirect(url_for('gerenciarreservas'))
     else:
         carrinhos = sql_fetch("SELECT id,nome FROM carrinho;")
         usuarios = sql_fetch("SELECT nif,nome FROM usuario;")
         reservas = sql_fetch("SELECT * FROM reserva ORDER BY id DESC;")
-        return render_template('gerenciar_reservas.html', userName=login.nome, carrinhos=carrinhos, usuarios=usuarios, reservas=reservas)
+        return render_template('gerenciar_reservas.html', carrinhos=carrinhos, usuarios=usuarios, reservas=reservas)
 
 
 @app.route("/gerenciar/reservas/del/<id>")
@@ -408,7 +414,7 @@ def resetdb():
 ###############################################################################
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run()
 
 ###############################################################################
 ###############################################################################

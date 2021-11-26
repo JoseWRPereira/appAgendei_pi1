@@ -18,9 +18,9 @@
     <tr>
       <td> {{ campo[1] }} </td>
       <td> {{ campo[2] }} </td>
-      <td> {{ campo[3] if campo[3]==userName else ' '}} </td>
-      <td> {{ campo[4] if campo[4]==userName else ' '}} </td>
-      <td> {{ campo[5] if campo[5]==userName else ' '}} </td>
+      <td> {{ campo[3] if campo[3]==session['username'] else ' '}} </td>
+      <td> {{ campo[4] if campo[4]==session['username'] else ' '}} </td>
+      <td> {{ campo[5] if campo[5]==session['username'] else ' '}} </td>
       <td>
         <a href="/excluir/{{campo[0]}}">Excluir</a>
       </td>
